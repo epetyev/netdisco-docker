@@ -1,0 +1,24 @@
+version: '2.3'
+
+services:
+
+  nginx:
+    command: nginx -c /data/conf/nginx.conf
+    image: nginx:latest
+    depends_on:
+    - netdisco-web
+    restart: unless-stopped
+    volumes:
+    - ./netdisco-nginx/nginx.conf:/data/conf/nginx.conf:ro
+
+    labels:
+       - "traefik.enable=true"
+       - "traefik.http.routers.netdisco.tls=true"
+       - "traefik.http.routers.netdisco.rule=Host(`netdisco`)"
+       - "traefik.http.routers.netdisco.service=netdisco"
+       - "traefik.http.services.netdisco.loadbalancer.server.port=8080"
+
+networks:
+   default:
+      external:
+         name: traefik-network
